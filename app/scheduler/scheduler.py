@@ -1,86 +1,99 @@
 import logging
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.base import JobLookupError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.executors.asyncio import AsyncIOExecutor
 
-# tasks.py에서 실제 작업 함수를 가져옵니다.
-from .tasks import collect_data_task
+from app.config import DATABASE_URL, DB_CONNECT_ARGS # DB URL 가져오기
 
-# 설정 파일 가져오기
-from .config import SCHEDULE_CONFIG, SOURCE_CONFIG, SCHEDULER_SETTINGS
-
-# 로깅 설정
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# 스케줄러 인스턴스 생성 (설정 직접 전달)
-try:
-    scheduler = BackgroundScheduler(**SCHEDULER_SETTINGS)
-    logger.info("Scheduler initialized with settings from config.")
-except Exception as e:
-    logger.error(f"Failed to initialize scheduler with settings: {e}", exc_info=True)
-    logger.warning("Initializing scheduler with default settings.")
-    scheduler = BackgroundScheduler()
+# 스케줄러 설정
+# 여기서는 작업 저장소로 SQLite 사용 (메모리 대신 영구 저장)
+# DATABASE_URL을 jobstore URL로 사용
+jobstores = {
+    # default jobstore는 DB 사용
+    'default': SQLAlchemyJobStore(url=DATABASE_URL)
+}
+executors = {
+    'default': AsyncIOExecutor()
+}
+job_defaults = {
+    'coalesce': False, # 동일 작업 동시 실행 방지
+    'max_instances': 1   # 동일 작업 최대 1개 인스턴스만 실행
+}
 
-def add_collection_jobs():
-    """설정 파일을 기반으로 데이터 수집 작업을 스케줄러에 추가합니다."""
-    logger.info("Adding data collection jobs to the scheduler...")
-    added_count = 0
-    skipped_count = 0
-    for url, config in SOURCE_CONFIG.items():
-        schedule_type = config.get('schedule_type')
-        priority = config.get('priority', 5) # 기본 우선순위 설정
-        schedule_info = SCHEDULE_CONFIG.get(schedule_type)
-
-        if not schedule_info:
-            logger.warning(f"Schedule type '{schedule_type}' not found for source: {url}. Skipping.")
-            skipped_count += 1
-            continue
-
-        trigger = schedule_info.get('trigger')
-        if not trigger:
-            logger.warning(f"Trigger not defined for schedule type '{schedule_type}'. Skipping source: {url}.")
-            skipped_count += 1
-            continue
-
-        job_id = f"collect_{url}" # URL 기반 고유 작업 ID
-
-        try:
-            # 실제 작업 함수(collect_data_task) 사용
-            scheduler.add_job(
-                collect_data_task, # 실제 작업 함수 사용
-                trigger=trigger,
-                args=[url, priority],
-                id=job_id,
-                name=f"Collect data from {url}",
-                replace_existing=True # 동일 ID 작업 존재 시 교체
-            )
-            logger.debug(f"Added job: {job_id} for {url} with schedule '{schedule_type}' and priority {priority}")
-            added_count += 1
-        except Exception as e:
-            logger.error(f"Failed to add job for {url}: {e}")
-            skipped_count += 1
-
-    logger.info(f"Finished adding jobs. Added: {added_count}, Skipped/Failed: {skipped_count}")
+# 스케줄러 인스턴스 생성 (전역으로 접근 가능하도록)
+scheduler = AsyncIOScheduler(
+    jobstores=jobstores,
+    executors=executors,
+    job_defaults=job_defaults,
+    timezone='UTC' # 또는 Asia/Seoul 등 로컬 타임존
+)
 
 def start_scheduler():
     """스케줄러를 시작합니다."""
     if not scheduler.running:
         try:
-            add_collection_jobs() # 시작 전 작업 추가
+            # TODO: 필요한 기본 작업들을 여기서 추가할 수 있음
+            # from .tasks import collect_rss_feeds_task
+            # scheduler.add_job(collect_rss_feeds_task, 'interval', hours=1, id='rss_collection_hourly')
+
             scheduler.start()
-            logger.info("Scheduler started successfully.")
+            logger.info("Scheduler started.")
         except Exception as e:
-            logger.error(f"Failed to start the scheduler: {e}")
+            logger.error(f"Failed to start scheduler: {e}", exc_info=True)
     else:
         logger.info("Scheduler is already running.")
 
-def stop_scheduler():
-    """스케줄러를 안전하게 중지합니다."""
+def shutdown_scheduler():
+    """스케줄러를 종료합니다."""
     if scheduler.running:
         try:
             scheduler.shutdown()
-            logger.info("Scheduler stopped successfully.")
+            logger.info("Scheduler shut down.")
         except Exception as e:
-            logger.error(f"Failed to stop the scheduler: {e}")
-    else:
-        logger.info("Scheduler is not running.")
+            logger.error(f"Failed to shut down scheduler: {e}", exc_info=True)
+
+# 스케줄러 관련 함수들 추가 (도구에서 사용할 수 있도록)
+def add_job_to_scheduler(func, trigger, **kwargs):
+    """스케줄러에 작업을 추가합니다."""
+    try:
+        job = scheduler.add_job(func, trigger, **kwargs)
+        logger.info(f"Job '{kwargs.get('id', job.id)}' added with trigger: {trigger}")
+        return job.id
+    except Exception as e:
+        logger.error(f"Failed to add job {kwargs.get('id', 'N/A')}: {e}", exc_info=True)
+        return None
+
+def get_job_status(job_id: str):
+    """특정 작업의 상태를 조회합니다."""
+    try:
+        job = scheduler.get_job(job_id)
+        if job:
+            return {
+                "id": job.id,
+                "name": job.name,
+                "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None,
+                "trigger": str(job.trigger)
+            }
+        else:
+            return None
+    except Exception as e:
+        logger.error(f"Failed to get job status for {job_id}: {e}", exc_info=True)
+        return None
+
+def list_all_jobs():
+     """스케줄러에 등록된 모든 작업 목록을 반환합니다."""
+     try:
+         jobs = scheduler.get_jobs()
+         return [
+             {
+                 "id": job.id,
+                 "name": job.name,
+                 "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None,
+                 "trigger": str(job.trigger)
+             } for job in jobs
+         ]
+     except Exception as e:
+         logger.error(f"Failed to list jobs: {e}", exc_info=True)
+         return []

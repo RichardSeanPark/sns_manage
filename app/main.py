@@ -20,6 +20,7 @@ from app.config import (
     SERVER_HOST, SERVER_PORT, API_PREFIX, 
     MCP_ENABLED, MCP_HOST, MCP_PORT
 )
+from app.scheduler.scheduler import start_scheduler, shutdown_scheduler
 
 # 로깅 설정
 logging.basicConfig(
@@ -65,6 +66,21 @@ app.include_router(collection_router)
 # MCP 서버 임포트 및 시작
 if MCP_ENABLED:
     from app.mcp.server import start_mcp_server
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting up application...")
+    # 스케줄러 시작
+    start_scheduler()
+    # MCP 서버 시작 (원래 위치에서 이동 또는 여기서도 호출)
+    if MCP_ENABLED:
+        start_mcp_in_thread()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("Shutting down application...")
+    # 스케줄러 종료
+    shutdown_scheduler()
 
 @app.get("/")
 async def root(request: Request):
@@ -140,9 +156,9 @@ def run_server():
     # 디버그 모드 설정
     debug_mode = args.debug or DEBUG
     
-    # MCP 서버 시작 (별도 스레드)
-    if MCP_ENABLED and not args.no_mcp:
-        start_mcp_in_thread()
+    # # MCP 서버 시작 (별도 스레드) - startup 이벤트 핸들러로 이동
+    # if MCP_ENABLED and not args.no_mcp:
+    #     start_mcp_in_thread()
     
     # FastAPI 서버 시작
     logger.info(f"서버 시작: http://{args.host}:{args.port}")

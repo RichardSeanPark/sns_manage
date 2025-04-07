@@ -19,3 +19,4 @@ tiktoken
 pydantic
 validators
 python-Levenshtein
+lxml
