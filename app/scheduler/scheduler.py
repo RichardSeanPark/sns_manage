@@ -1,96 +1,86 @@
 import logging
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.base import JobLookupError
+
+# tasks.py에서 실제 작업 함수를 가져옵니다.
+from .tasks import collect_data_task
+
+# 설정 파일 가져오기
+from .config import SCHEDULE_CONFIG, SOURCE_CONFIG, SCHEDULER_SETTINGS
 
 # 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# TODO: 데이터베이스 URL 설정 로드 (예: config.py 또는 환경 변수)
-DATABASE_URL = "sqlite:///jobs.sqlite"
+# 스케줄러 인스턴스 생성 (설정 직접 전달)
+try:
+    scheduler = BackgroundScheduler(**SCHEDULER_SETTINGS)
+    logger.info("Scheduler initialized with settings from config.")
+except Exception as e:
+    logger.error(f"Failed to initialize scheduler with settings: {e}", exc_info=True)
+    logger.warning("Initializing scheduler with default settings.")
+    scheduler = BackgroundScheduler()
 
-jobstores = {
-    'default': SQLAlchemyJobStore(url=DATABASE_URL)
-}
-executors = {
-    'default': ThreadPoolExecutor(20),
-    'processpool': ProcessPoolExecutor(5)
-}
-job_defaults = {
-    'coalesce': False,
-    'max_instances': 3
-}
+def add_collection_jobs():
+    """설정 파일을 기반으로 데이터 수집 작업을 스케줄러에 추가합니다."""
+    logger.info("Adding data collection jobs to the scheduler...")
+    added_count = 0
+    skipped_count = 0
+    for url, config in SOURCE_CONFIG.items():
+        schedule_type = config.get('schedule_type')
+        priority = config.get('priority', 5) # 기본 우선순위 설정
+        schedule_info = SCHEDULE_CONFIG.get(schedule_type)
 
-scheduler = AsyncIOScheduler(
-    jobstores=jobstores,
-    executors=executors,
-    job_defaults=job_defaults,
-    timezone='Asia/Seoul'  # 시스템에 맞는 타임존 설정
-)
+        if not schedule_info:
+            logger.warning(f"Schedule type '{schedule_type}' not found for source: {url}. Skipping.")
+            skipped_count += 1
+            continue
+
+        trigger = schedule_info.get('trigger')
+        if not trigger:
+            logger.warning(f"Trigger not defined for schedule type '{schedule_type}'. Skipping source: {url}.")
+            skipped_count += 1
+            continue
+
+        job_id = f"collect_{url}" # URL 기반 고유 작업 ID
+
+        try:
+            # 실제 작업 함수(collect_data_task) 사용
+            scheduler.add_job(
+                collect_data_task, # 실제 작업 함수 사용
+                trigger=trigger,
+                args=[url, priority],
+                id=job_id,
+                name=f"Collect data from {url}",
+                replace_existing=True # 동일 ID 작업 존재 시 교체
+            )
+            logger.debug(f"Added job: {job_id} for {url} with schedule '{schedule_type}' and priority {priority}")
+            added_count += 1
+        except Exception as e:
+            logger.error(f"Failed to add job for {url}: {e}")
+            skipped_count += 1
+
+    logger.info(f"Finished adding jobs. Added: {added_count}, Skipped/Failed: {skipped_count}")
 
 def start_scheduler():
     """스케줄러를 시작합니다."""
     if not scheduler.running:
         try:
+            add_collection_jobs() # 시작 전 작업 추가
             scheduler.start()
-            logger.info("스케줄러가 성공적으로 시작되었습니다.")
+            logger.info("Scheduler started successfully.")
         except Exception as e:
-            logger.error(f"스케줄러 시작 중 오류 발생: {e}")
+            logger.error(f"Failed to start the scheduler: {e}")
     else:
-        logger.info("스케줄러가 이미 실행 중입니다.")
+        logger.info("Scheduler is already running.")
 
 def stop_scheduler():
-    """스케줄러를 종료합니다."""
+    """스케줄러를 안전하게 중지합니다."""
     if scheduler.running:
         try:
             scheduler.shutdown()
-            logger.info("스케줄러가 성공적으로 종료되었습니다.")
+            logger.info("Scheduler stopped successfully.")
         except Exception as e:
-            logger.error(f"스케줄러 종료 중 오류 발생: {e}")
-
-def add_crawl_job(site_config):
-    """크롤링 작업을 스케줄러에 추가합니다.
-
-    Args:
-        site_config (dict): 사이트 설정 정보 (URL, 크롤링 주기, 우선순위 등 포함)
-    """
-    # TODO: site_config에서 필요한 정보 추출 (job_id, trigger, func 등)
-    job_id = f"crawl_{site_config['name']}" # 예시 ID
-    crawl_interval_minutes = site_config.get('interval_minutes', 60) # 기본 60분
-
-    # TODO: 실제 크롤링 함수 연결 (예: collector 모듈의 함수)
-    def dummy_crawl_func(url):
-        logger.info(f"Crawling {url}...")
-        # 실제 크롤링 로직 호출
-        pass
-
-    try:
-        scheduler.add_job(
-            dummy_crawl_func,
-            'interval',
-            minutes=crawl_interval_minutes,
-            id=job_id,
-            args=[site_config['url']],
-            replace_existing=True,
-            misfire_grace_time=600 # 10분
-            # TODO: 우선순위 관련 설정 추가 (executor 등)
-        )
-        logger.info(f"크롤링 작업 추가됨: {job_id}, 주기: {crawl_interval_minutes}분")
-    except Exception as e:
-        logger.error(f"작업 추가 중 오류 발생 ({job_id}): {e}")
-
-def load_scheduled_jobs():
-    """설정 파일이나 DB에서 작업 설정을 로드하여 스케줄러에 추가합니다."""
-    # TODO: 설정 파일(config.py) 또는 데이터베이스에서 사이트별 크롤링 설정 로드
-    # 예시 설정 (실제로는 외부에서 로드)
-    example_sites = [
-        {'name': 'example_site_1', 'url': 'http://example.com/news', 'interval_minutes': 30, 'priority': 1},
-        {'name': 'example_site_2', 'url': 'http://example.org/ai', 'interval_minutes': 120, 'priority': 2},
-    ]
-    for site in example_sites:
-        add_crawl_job(site)
-
-# 애플리케이션 시작 시 스케줄러 시작 및 작업 로드
-# 예: FastAPI의 startup 이벤트 핸들러 등에서 호출
-# start_scheduler()
-# load_scheduled_jobs() 
+            logger.error(f"Failed to stop the scheduler: {e}")
+    else:
+        logger.info("Scheduler is not running.")
