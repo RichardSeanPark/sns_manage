@@ -88,52 +88,56 @@
   - [x] 수동 테스트 지침서 작성
 
 ### 2.3 웹 크롤링 모듈 (기본)
-- [ ] 주요 크롤링 대상 웹사이트 정의 및 우선순위 설정
-  - [ ] **AI 연구 기관 웹사이트**:
-    - [ ] OpenAI (openai.com/research, openai.com/blog)
-    - [ ] Anthropic (anthropic.com/research)
-    - [ ] Google DeepMind (deepmind.google/research)
-    - [ ] Meta AI (ai.meta.com/research)
-    - [ ] Microsoft Research AI (microsoft.com/en-us/research/research-area/artificial-intelligence)
-  - [ ] **AI 전문 뉴스 사이트**:
-    - [ ] AI News (artificialintelligence-news.com)
-    - [ ] AITopics (aitopics.org/news)
-    - [ ] Analytics Insight AI 섹션 (analyticsinsight.net/category/artificial-intelligence)
-  - [ ] **한국 AI 관련 사이트**:
-    - [ ] AI 타임스 (aitimes.com)
-    - [ ] 전자신문 AI 섹션 (etnews.com/news/section.html?id1=02&id2=06)
-    - [ ] 네이버 AI 랩 (clova.ai/ko/research/research-areas.html)
-    - [ ] 카카오 AI (tech.kakao.com/tag/ai)
-  - [ ] **AI 제품 런칭 사이트**:
-    - [ ] Product Hunt AI 카테고리 (producthunt.com/topics/artificial-intelligence)
-    - [ ] HuggingFace (huggingface.co/blog)
-- [ ] 사이트별 크롤링 전략 및 우선순위 설계
-  - [ ] 사이트별 업데이트 빈도 분석 및 크롤링 일정 최적화
-  - [ ] 사이트별 중요 콘텐츠 위치 및 추출 패턴 정의
-- [ ] 사이트별 크롤링 허용 정책 확인 및 robots.txt 준수 방안
-- [ ] Playwright 기반 웹 크롤링 시스템 구현
-  - [ ] Playwright 설치 및 기본 설정
-  - [ ] 헤드리스 브라우저 구성 및 최적화
-  - [ ] 브라우저 컨텍스트 및 세션 관리 전략
-  - [ ] 다중 브라우저 지원 설정 (Chromium, Firefox, WebKit)
-- [ ] 사이트별 콘텐츠 추출 로직 구현
-  - [ ] CSS 선택자 및 XPath 기반 콘텐츠 추출
-  - [ ] 동적 로딩 콘텐츠 대기 및 처리 메커니즘
-  - [ ] 무한 스크롤 및 페이지네이션 처리
-  - [ ] AJAX 요청 모니터링 및 데이터 추출
-- [ ] 웹페이지 본문 추출 로직 구현
-  - [ ] 자바스크립트 실행 후 DOM 분석 기반 본문 추출
-  - [ ] 숨겨진 콘텐츠 및 동적 렌더링 처리
-  - [ ] 텍스트 정제 및 추출 파이프라인
-- [ ] 이미지 및 멀티미디어 처리
-  - [ ] 주요 이미지 스크린샷 및 저장
-  - [ ] 동적 로딩 이미지 처리
-  - [ ] 이미지 메타데이터 추출
-- [ ] 사이트 상호작용 및 고급 크롤링 기능
-  - [ ] 클릭, 스크롤 등 사용자 상호작용 자동화
-  - [ ] 로그인 처리 및 세션 유지
-  - [ ] 캡차 감지 및 우회 전략
-- [ ] 웹사이트별 크롤링 딜레이 설정 및 재시도 정책 구현
+- [x] 주요 크롤링 대상 웹사이트 정의 및 우선순위 설정
+  - [x] **AI 연구 기관 웹사이트**:
+    - [x] OpenAI (openai.com/research, openai.com/blog)
+    - [x] Anthropic (anthropic.com/research)
+    - [x] Google DeepMind (deepmind.google/research)
+    - [x] Meta AI (ai.meta.com/research)
+    - [x] Microsoft Research AI (microsoft.com/en-us/research/research-area/artificial-intelligence)
+  - [x] **AI 전문 뉴스 사이트**:
+    - [x] AI News (artificialintelligence-news.com)
+    - [x] AITopics (aitopics.org/news)
+    - [x] Analytics Insight AI 섹션 (analyticsinsight.net/category/artificial-intelligence)
+  - [x] **한국 AI 관련 사이트**:
+    - [x] AI 타임스 (aitimes.com)
+    - [x] 전자신문 AI 섹션 (etnews.com/news/section.html?id1=02&id2=06)
+    - [x] 네이버 AI 랩 (clova.ai/ko/research/research-areas.html)
+    - [x] 카카오 AI (tech.kakao.com/tag/ai)
+  - [x] **AI 제품 런칭 사이트**:
+    - [x] Product Hunt AI 카테고리 (producthunt.com/topics/artificial-intelligence)
+    - [x] HuggingFace (huggingface.co/blog)
+- [x] 사이트별 크롤링 전략 및 우선순위 설계
+  - [x] 사이트별 업데이트 빈도 분석 및 크롤링 일정 최적화
+  - [x] 사이트별 중요 콘텐츠 위치 및 추출 패턴 정의
+- [x] 사이트별 크롤링 허용 정책 확인 및 robots.txt 준수 방안
+- [x] Playwright 기반 웹 크롤링 시스템 구현
+  - [x] Playwright 설치 및 기본 설정
+  - [x] 헤드리스 브라우저 구성 및 최적화
+  - [x] 브라우저 컨텍스트 및 세션 관리 전략
+  - [x] 다중 브라우저 지원 설정 (Chromium, Firefox, WebKit)
+- [x] 사이트별 콘텐츠 추출 로직 구현
+  - [x] CSS 선택자 및 XPath 기반 콘텐츠 추출
+  - [x] 동적 로딩 콘텐츠 대기 및 처리 메커니즘
+  - [x] 무한 스크롤 및 페이지네이션 처리
+  - [x] AJAX 요청 모니터링 및 데이터 추출
+- [x] 웹페이지 본문 추출 로직 구현
+  - [x] 자바스크립트 실행 후 DOM 분석 기반 본문 추출
+  - [x] 숨겨진 콘텐츠 및 동적 렌더링 처리
+  - [x] 텍스트 정제 및 추출 파이프라인
+- [x] 이미지 및 멀티미디어 처리
+  - [x] 주요 이미지 스크린샷 및 저장
+  - [x] 동적 로딩 이미지 처리
+  - [x] 이미지 메타데이터 추출
+- [x] 사이트 상호작용 및 고급 크롤링 기능
+  - [x] 클릭, 스크롤 등 사용자 상호작용 자동화
+  - [x] 로그인 처리 및 세션 유지
+  - [x] 캡차 감지 및 우회 전략
+- [x] 웹사이트별 크롤링 딜레이 설정 및 재시도 정책 구현
+- [x] 웹 크롤링 모듈 기본 테스트
+  - [x] 단위 테스트 작성 및 실행 (`TestWebCrawler`, `TestCrawlerManager`)
+  - [x] 통합 테스트 작성 및 실행 (`TestSiteCrawling`)
+  - [x] 수동 테스트 지침서 작성 (간단한 실행 확인)
 
 ### 2.4 웹 크롤링 MCP 서버 구현
 - [ ] MCP 서버 구조 설정
