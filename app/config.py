@@ -50,6 +50,11 @@ MCP_ENABLED = os.getenv("MCP_ENABLED", "True").lower() == "true"
 MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
 MCP_PORT = int(os.getenv("MCP_PORT", "8100"))
 
+# 웹 크롤러 (Playwright) 설정
+BROWSER_POOL_SIZE = int(os.getenv("BROWSER_POOL_SIZE", "3"))
+PAGE_LOAD_TIMEOUT_MS = int(os.getenv("PAGE_LOAD_TIMEOUT_MS", "60000")) # 60 seconds
+MAX_RETRIES = int(os.getenv("MAX_RETRIES", "2"))
+
 # RSS 피드 설정
 RSS_SOURCES = [
     # 주요 AI 연구/기업 블로그
@@ -111,6 +116,11 @@ PUBLISH_CONFIG = {
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOG_DIR = BASE_DIR / "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
+
+# 데이터베이스 설정
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR}/collected_news.db")
+# SQLite 사용 시 check_same_thread 설정 필요
+DB_CONNECT_ARGS = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
 
 # 스케줄러 설정
 SCHEDULER_CONFIG = {

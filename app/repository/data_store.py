@@ -99,5 +99,6 @@ class InMemoryDataStore(BaseRepository):
                 return True
         return False
 
-# 전역 저장소 인스턴스 (싱글톤처럼 사용 가능)
-data_store: BaseRepository = InMemoryDataStore()
+# SQLite 저장소를 기본으로 사용
+from .sqlite_store import SQLiteRepository
+data_store: BaseRepository = SQLiteRepository()
