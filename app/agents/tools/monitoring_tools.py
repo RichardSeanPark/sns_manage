@@ -2,7 +2,16 @@ import logging
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
 
-from agents import tool
+# agents 임포트 시도
+try:
+    from agents import tool
+except ImportError:
+    # 대체 데코레이터 정의
+    def tool(func):
+        return func
+    logger = logging.getLogger(__name__)
+    logger.warning("Could not import 'agents' library. Using dummy 'tool' decorator.")
+
 from app.repository.monitoring_store import monitoring_store # 모니터링 저장소 인스턴스 직접 임포트
 from app.models.enums import MonitoringStatus # 모니터링 상태 Enum
 

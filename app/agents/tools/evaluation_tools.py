@@ -3,7 +3,16 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, HttpUrl
 import random # 임시 점수 생성을 위한 random 모듈
 
-from agents import tool
+# agents 임포트 시도
+try:
+    from agents import tool
+except ImportError:
+    # 대체 데코레이터 정의
+    def tool(func):
+        return func
+    logger = logging.getLogger(__name__)
+    logger.warning("Could not import 'agents' library. Using dummy 'tool' decorator.")
+
 # TODO: 평가에 필요한 데이터 모델이나 유틸리티 함수가 있다면 임포트
 # from app.models.pydantic_models import CollectedData
 # from app.repository.data_store import get_repository

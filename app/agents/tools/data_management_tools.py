@@ -2,9 +2,18 @@ import logging
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
-from agents import tool # Agents SDK의 tool 데코레이터
-from app.repository.data_store import get_repository # 저장소 인스턴스 가져오기
-from app.models.pydantic_models import CollectedData # Pydantic 모델
+# agents 임포트 시도
+try:
+    from agents import tool # Agents SDK의 tool 데코레이터
+except ImportError:
+    # 대체 데코레이터 정의
+    def tool(func):
+        return func
+    logger = logging.getLogger(__name__)
+    logger.warning("Could not import 'agents' library. Using dummy 'tool' decorator.")
+
+from app.repository.data_store import get_repository # 임포트 경로 수정
+from app.models.collected_data import CollectedData # 임포트 경로 수정
 
 logger = logging.getLogger(__name__)
 

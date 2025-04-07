@@ -5,11 +5,20 @@ from pydantic import BaseModel, Field, HttpUrl
 import httpx
 from bs4 import BeautifulSoup
 
-from agents import tool
+# agents 임포트 시도
+try:
+    from agents import tool
+except ImportError:
+    # 대체 데코레이터 정의
+    def tool(func):
+        return func
+    logger = logging.getLogger(__name__)
+    logger.warning("Could not import 'agents' library. Using dummy 'tool' decorator.")
+
 from app.utils.data_collection import parse_rss_feed # 방금 만든 유틸리티 함수 임포트
-from app.models.pydantic_models import CollectedData
-from app.config import RSS_SOURCES # 설정에서 RSS 소스 목록 가져오기 (카테고리 정보 활용)
-from app.models.enums import SourceType # SourceType 추가
+from app.models.collected_data import CollectedData # 임포트 경로 수정
+from app.config import RSS_SOURCES, USER_AGENT # 설정에서 RSS 소스 목록, User-Agent 가져오기
+from app.models.enums import SourceType, ProcessingStatus # SourceType, ProcessingStatus 추가
 from datetime import datetime, timezone # datetime, timezone 추가
 
 logger = logging.getLogger(__name__)
@@ -119,7 +128,7 @@ async def crawl_webpage_tool(input_data: CrawlInput) -> Optional[CollectedData]:
         # CollectedData 객체 생성 (기본 정보만 채움)
         collected_item = CollectedData(
             source_url=url,
-            source_type=SourceType.WEB, # 소스 타입 WEB으로 지정
+            source_type=SourceType.CRAWLING, # 소스 타입 CRAWLING으로 지정
             collected_at=collected_at,
             title=title.strip() if title else url,
             link=url, # 웹페이지의 경우 link는 source_url과 동일
