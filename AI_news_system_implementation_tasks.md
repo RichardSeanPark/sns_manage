@@ -140,20 +140,20 @@
   - [x] 수동 테스트 지침서 작성 (간단한 실행 확인)
 
 ### 2.4 웹 크롤링 MCP 서버 구현
-- [ ] MCP 서버 구조 설정
-- [ ] Playwright 기반 크롤링 도구 함수 정의
-  - [ ] `launch_browser()` - 브라우저 인스턴스 초기화 및 구성
-  - [ ] `crawl_page(url)` - 지정된 URL의 전체 페이지 크롤링
-  - [ ] `extract_content(page, selectors)` - 특정 선택자 기반 콘텐츠 추출
-  - [ ] `interact_with_page(page, actions)` - 페이지 상호작용 수행
-  - [ ] `follow_links(page, pattern)` - 특정 패턴의 링크 추적
-- [ ] 브라우저 풀 관리 기능 구현
-  - [ ] 브라우저 인스턴스 재사용 및 리소스 최적화
-  - [ ] 병렬 페이지 크롤링 관리
+- [x] MCP 서버 구조 설정
+- [x] Playwright 기반 크롤링 도구 함수 정의
+  - [x] `launch_browser()` - 브라우저 인스턴스 초기화 및 구성
+  - [x] `crawl_page(url)` - 지정된 URL의 전체 페이지 크롤링
+  - [x] `extract_content(page, selectors)` - 특정 선택자 기반 콘텐츠 추출
+  - [x] `interact_with_page(page, actions)` - 페이지 상호작용 수행 (기본 구조)
+  - [x] `follow_links(page, pattern)` - 특정 패턴의 링크 추적 (기본 구조)
+- [x] 브라우저 풀 관리 기능 구현
+  - [x] 브라우저 인스턴스 재사용 및 리소스 최적화
+  - [x] 병렬 페이지 크롤링 관리
 - [ ] 오류 처리 및 로깅
-  - [ ] 브라우저 충돌 복구 메커니즘
-  - [ ] 네트워크 오류 감지 및 재시도 로직
-  - [ ] 성능 및 리소스 사용량 모니터링
+  - [x] 브라우저 충돌 복구 메커니즘 (기본)
+  - [x] 네트워크 오류 감지 및 재시도 로직 (tenacity 사용)
+  - [ ] 성능 및 리소스 사용량 모니터링 (추후 개선)
 
 ### 2.5 데이터 수집 통합 관리
 - [ ] 데이터 수집 작업 스케줄러 구현
