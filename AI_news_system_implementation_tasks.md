@@ -116,10 +116,17 @@
   - [x] 모니터링 로그 DB 모델 및 Enum 정의
   - [x] `SQLiteMonitoringRepository` 구현
   - [x] 태스크 로깅 통합
-- [ ] 수집 API 구현 (다른 모듈에서 수집 데이터 요청용)
-- [ ] OpenAI Agent 설정 (Collector Agent)
-  - [ ] 에이전트 프롬프트 템플릿 설계 및 최적화
-  - [ ] 명확한 역할 및 목표 정의
+- [x] 수집 API 구현 (다른 모듈에서 수집 데이터 요청용)
+- [x] OpenAI Agent 설정 (Collector Agent)
+  - [x] 에이전트 프롬프트 템플릿 설계 및 최적화
+  - [x] 명확한 역할 및 목표 정의
+  - [x] 에이전트 도구 구현
+    - [x] 데이터 관리 도구 (`get_collected_data_tool`, `save_collected_data_tool`)
+    - [x] 데이터 수집 도구 (`collect_rss_feeds_tool`, `crawl_webpage_tool`)
+    - [x] 스케줄러 도구 (`schedule_collection_task_tool`, `check_task_status_tool`, `list_scheduled_tasks_tool`)
+    - [x] 모니터링 도구 (`log_monitoring_start_tool`, `log_monitoring_end_tool`)
+    - [x] 평가 도구 (`evaluate_source_quality_tool`)
+    - [x] 에이전트 도구 단위 테스트 구현 및 통과 (`tests/agents/tools/*.py`)
 - [ ] RSS-MCP 및 크롤링-MCP 서버 연동
   - [ ] API 및 인터페이스 연동
   - [ ] 도구 호출 오케스트레이션
