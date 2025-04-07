@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
-from app.models.pydantic_models import CollectedData # Pydantic 모델 경로 확인 필요
+from app.models.collected_data import CollectedData # 경로 수정: pydantic_models -> collected_data
 from app.repository.base import BaseRepository # BaseRepository 경로 확인 필요
 from app.repository.data_store import get_repository # get_repository 의존성 주입 함수 경로 확인 필요
 
@@ -13,7 +13,7 @@ router = APIRouter(
 @router.get("/", response_model=List[CollectedData])
 async def read_collected_data(
     skip: int = 0,
-    limit: int = Query(default=100, le=1000), # 한 번에 최대 1000개 조회 제한
+    limit: int = Query(default=100, gt=0, le=1000), # 한 번에 최대 1000개 조회 제한
     repository: BaseRepository = Depends(get_repository)
 ):
     """

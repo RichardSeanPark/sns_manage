@@ -99,6 +99,15 @@ class InMemoryDataStore(BaseRepository):
                 return True
         return False
 
-# SQLite 저장소를 기본으로 사용
+# SQLite 저장소 인스턴스를 반환하는 함수 (의존성 주입용)
 from .sqlite_store import SQLiteRepository
-data_store: BaseRepository = SQLiteRepository()
+
+# 싱글톤 패턴을 사용하여 DB 연결을 관리할 수도 있으나,
+# FastAPI의 Depends는 호출 시마다 함수를 실행하므로 여기서는 단순 인스턴스화
+def get_repository() -> BaseRepository:
+    # 실제로는 설정에 따라 다른 저장소를 반환하도록 확장 가능
+    return SQLiteRepository()
+
+# # 기존 전역 변수 방식 제거
+# from .sqlite_store import SQLiteRepository
+# data_store: BaseRepository = SQLiteRepository()
