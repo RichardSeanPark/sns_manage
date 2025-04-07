@@ -169,59 +169,53 @@ class RSSCollector:
         return ""
     
     def _clean_html(self, html_content: str) -> str:
-        """
-        HTML 문자열에서 태그를 제거하고 텍스트만 추출
-        
-        Args:
-            html_content: HTML 문자열
-            
-        Returns:
-            정제된 텍스트
-        """
+        """HTML 문자열에서 태그를 제거하고 텍스트만 추출"""
         if not html_content:
             return ""
         
-        # BeautifulSoup으로 HTML 파싱
         soup = BeautifulSoup(html_content, 'html.parser')
-        
-        # 텍스트만 추출
+        # Get text with spaces as separators, strip outer whitespace
         text = soup.get_text(separator=' ', strip=True)
-        
-        # 여러 공백을 하나로 치환
-        text = re.sub(r'\s+', ' ', text).strip()
-        
-        return text
+        # Collapse multiple whitespace characters into a single space
+        text = re.sub(r'\s+', ' ', text)
+        # Remove space before common punctuation marks
+        text = re.sub(r'\s+([.,!?])', r'\1', text)
+        # Strip any leading/trailing whitespace that might remain
+        return text.strip()
     
     def _extract_tags(self, entry) -> List[str]:
-        """
-        피드 엔트리에서 태그를 추출
+        """피드 엔트리에서 태그를 추출"""
+        tags = set() # Use set for automatic duplicate removal
         
-        Args:
-            entry: feedparser 엔트리
-            
-        Returns:
-            태그 목록
-        """
-        tags = []
-        
-        # 태그 필드가 있는 경우
+        # tags 필드 처리
         if hasattr(entry, 'tags'):
             for tag in entry.tags:
-                tag_name = tag.get('term', '')
-                if tag_name and tag_name not in tags:
-                    tags.append(tag_name)
+                tag_term = tag.get('term')
+                if tag_term:
+                    tags.add(tag_term.strip())
         
-        # 카테고리 필드가 있는 경우
+        # categories 필드 처리
         if hasattr(entry, 'categories'):
-            for category in entry.categories:
-                if isinstance(category, tuple) and len(category) > 0:
-                    category_name = category[0]
-                    if category_name and category_name not in tags:
-                        tags.append(category_name)
-                elif isinstance(category, str) and category not in tags:
-                    tags.append(category)
-        
-        return tags
+            for category_list in entry.categories:
+                # Check if category_list is iterable (list/tuple) and not a string
+                if hasattr(category_list, '__iter__') and not isinstance(category_list, str):
+                    for category_item in category_list:
+                        # Handle potential inner tuples or strings
+                        cat_name = None
+                        if isinstance(category_item, (tuple, list)) and len(category_item) > 0:
+                             cat_name = category_item[0]
+                        elif isinstance(category_item, str):
+                             cat_name = category_item
+                        
+                        if cat_name:
+                            tags.add(cat_name.strip())
+                # Handle case where category is just a string
+                elif isinstance(category_list, str):
+                    if category_list: # Ensure not empty string
+                       tags.add(category_list.strip())
+                       
+        # Return sorted list for consistent test results
+        return sorted(list(tags))
     
     def _remove_duplicates(self, items: List[FeedItem]) -> List[FeedItem]:
         """
