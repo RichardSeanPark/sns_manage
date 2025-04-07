@@ -10,6 +10,7 @@ load_dotenv()
 
 # 프로젝트 루트 경로
 BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BASE_DIR
 
 # 개발 환경 설정
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
@@ -23,6 +24,31 @@ NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
 # 데이터 경로 설정
 DATA_DIR = BASE_DIR / "data"
 os.makedirs(DATA_DIR, exist_ok=True)
+
+# 정적 파일 및 템플릿 경로
+STATIC_DIR = BASE_DIR / "static"
+os.makedirs(STATIC_DIR, exist_ok=True)
+TEMPLATES_DIR = BASE_DIR / "app" / "templates"
+os.makedirs(TEMPLATES_DIR, exist_ok=True)
+
+# 임시 데이터 디렉토리
+RAW_FEEDS_DIR = DATA_DIR / "raw_feeds"
+os.makedirs(RAW_FEEDS_DIR, exist_ok=True)
+FILTERED_FEEDS_DIR = DATA_DIR / "filtered_feeds"
+os.makedirs(FILTERED_FEEDS_DIR, exist_ok=True)
+SUMMARIES_DIR = DATA_DIR / "summaries"
+os.makedirs(SUMMARIES_DIR, exist_ok=True)
+
+# 서버 설정
+SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
+SERVER_PORT = int(os.getenv("SERVER_PORT", "8000"))
+API_PREFIX = "/api"
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
+
+# MCP 서버 설정
+MCP_ENABLED = os.getenv("MCP_ENABLED", "True").lower() == "true"
+MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
+MCP_PORT = int(os.getenv("MCP_PORT", "8100"))
 
 # RSS 피드 설정
 RSS_SOURCES = [
@@ -85,3 +111,23 @@ PUBLISH_CONFIG = {
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOG_DIR = BASE_DIR / "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
+
+# 스케줄러 설정
+SCHEDULER_CONFIG = {
+    "collect_interval_minutes": 60,  # 수집 간격 (분)
+    "filter_interval_minutes": 120,  # 필터링 간격 (분)
+    "summarize_interval_minutes": 180,  # 요약 간격 (분)
+    "publish_interval_minutes": 240,  # 게시 간격 (분)
+}
+
+# API 버전 및 정보
+API_VERSION = "1.0.0"
+API_TITLE = "AI 뉴스 자동 수집·요약 시스템 API"
+API_DESCRIPTION = "AI 및 LLM 관련 최신 뉴스를 자동으로 수집하고 요약하는 서비스 API"
+API_CONTACT = {
+    "name": "AI News Manager",
+    "email": "ai.news.manager@example.com",
+}
+
+SUMMARY_MAX_TOKENS = 500
+SUMMARY_TEMPERATURE = 0.7

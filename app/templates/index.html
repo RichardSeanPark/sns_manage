@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .header {
+            background-color: #3498db;
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            border-bottom: none;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online {
+            background-color: #2ecc71;
+        }
+        .status-offline {
+            background-color: #e74c3c;
+        }
+        .feed-item {
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+        .feed-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .feed-source {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+        .feed-date {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+        .section-title {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+        }
+        #latestFeeds {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .status-panel {
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header text-center">
+        <div class="container">
+            <h1>AI & LLM 뉴스 수집 시스템</h1>
+            <p class="lead">최신 AI 및 LLM 관련 뉴스를 자동으로 수집하고 요약합니다</p>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="container">
+        <!-- 시스템 상태 -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-4">
+                <h2 class="section-title">시스템 상태</h2>
+                <div class="card">
+                    <div class="card-header">
+                        서버 상태
+                    </div>
+                    <div class="card-body status-panel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p>
+                                    <strong>API 서버:</strong>
+                                    <span class="status-indicator status-online"></span>
+                                    온라인
+                                </p>
+                                <p>
+                                    <strong>API URL:</strong>
+                                    <a href="{{ api_url }}" target="_blank">{{ api_url }}</a>
+                                </p>
+                                <p>
+                                    <strong>API 문서:</strong>
+                                    <a href="{{ api_url }}/docs" target="_blank">API 문서 보기</a>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p>
+                                    <strong>MCP 서버:</strong>
+                                    {% if mcp_enabled %}
+                                    <span class="status-indicator status-online"></span>
+                                    온라인
+                                    {% else %}
+                                    <span class="status-indicator status-offline"></span>
+                                    비활성화
+                                    {% endif %}
+                                </p>
+                                {% if mcp_enabled %}
+                                <p>
+                                    <strong>MCP URL:</strong>
+                                    <a href="{{ mcp_url }}" target="_blank">{{ mcp_url }}</a>
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <h2 class="section-title">빠른 작업</h2>
+                <div class="card">
+                    <div class="card-header">
+                        작업 실행
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button id="collectFeedsBtn" class="btn btn-primary mb-2">
+                                <i class="bi bi-arrow-repeat"></i> RSS 피드 수집
+                            </button>
+                            <button id="viewLatestFeedsBtn" class="btn btn-outline-primary mb-2">
+                                <i class="bi bi-list"></i> 최신 피드 보기
+                            </button>
+                            <button id="viewCategoriesBtn" class="btn btn-outline-secondary">
+                                <i class="bi bi-tags"></i> 카테고리 보기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 최신 피드 섹션 -->
+        <div class="row">
+            <div class="col-12">
+                <h2 class="section-title">최신 피드</h2>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>최신 수집 피드</span>
+                        <div>
+                            <select id="categoryFilter" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                <option value="">모든 카테고리</option>
+                                <!-- 카테고리 옵션이 여기에 동적으로 추가됩니다 -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="feedsLoading" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">로딩 중...</span>
+                            </div>
+                            <p class="mt-2">피드 로딩 중...</p>
+                        </div>
+                        <div id="latestFeeds" class="d-none">
+                            <!-- 피드 아이템이 여기에 동적으로 추가됩니다 -->
+                        </div>
+                        <div id="noFeeds" class="text-center py-5 d-none">
+                            <p class="text-muted">수집된 피드가 없습니다.</p>
+                            <button id="collectFeedsBtnEmpty" class="btn btn-primary">
+                                RSS 피드 수집 시작
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer text-center">
+        <div class="container">
+            <p>© 2023 AI 뉴스 수집 시스템 | 개발: 모두의연구소</p>
+        </div>
+    </footer>
+
+    <!-- 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API 기본 URL
+        const API_URL = "{{ api_url }}";
+        
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            // 서버 상태 체크
+            checkServerStatus();
+            
+            // 카테고리 로드
+            loadCategories();
+            
+            // 최신 피드 로드
+            loadLatestFeeds();
+            
+            // 이벤트 리스너 등록
+            document.getElementById('collectFeedsBtn').addEventListener('click', collectFeeds);
+            document.getElementById('collectFeedsBtnEmpty').addEventListener('click', collectFeeds);
+            document.getElementById('viewLatestFeedsBtn').addEventListener('click', loadLatestFeeds);
+            document.getElementById('viewCategoriesBtn').addEventListener('click', showCategories);
+            document.getElementById('categoryFilter').addEventListener('change', function() {
+                loadLatestFeeds(this.value);
+            });
+        });
+        
+        // 서버 상태 확인
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_URL}/status`);
+                const data = await response.json();
+                
+                if (data.status === 'online') {
+                    console.log('서버가 온라인 상태입니다.');
+                }
+            } catch (error) {
+                console.error('서버 상태 확인 오류:', error);
+            }
+        }
+        
+        // RSS 피드 수집
+        async function collectFeeds() {
+            const collectBtn = document.getElementById('collectFeedsBtn');
+            const originalText = collectBtn.innerHTML;
+            
+            collectBtn.disabled = true;
+            collectBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 수집 중...';
+            
+            try {
+                const response = await fetch(`${API_URL}/collect-feeds`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    alert(`RSS 피드 수집 완료: ${data.count}개 피드 수집됨`);
+                    loadLatestFeeds(); // 피드 새로고침
+                } else {
+                    alert(`오류 발생: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('피드 수집 오류:', error);
+                alert('피드 수집 중 오류가 발생했습니다.');
+            } finally {
+                collectBtn.disabled = false;
+                collectBtn.innerHTML = originalText;
+            }
+        }
+        
+        // 카테고리 로드
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_URL}/categories`);
+                const categories = await response.json();
+                
+                const categorySelect = document.getElementById('categoryFilter');
+                
+                // 모든 카테고리 옵션 제외하고 기존 옵션 제거
+                while (categorySelect.options.length > 1) {
+                    categorySelect.remove(1);
+                }
+                
+                // 카테고리 옵션 추가
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categorySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('카테고리 로드 오류:', error);
+            }
+        }
+        
+        // 최신 피드 로드
+        async function loadLatestFeeds(category = '') {
+            const feedsLoading = document.getElementById('feedsLoading');
+            const latestFeeds = document.getElementById('latestFeeds');
+            const noFeeds = document.getElementById('noFeeds');
+            
+            // 로딩 표시
+            feedsLoading.classList.remove('d-none');
+            latestFeeds.classList.add('d-none');
+            noFeeds.classList.add('d-none');
+            
+            try {
+                let url = `${API_URL}/latest-feeds?limit=20`;
+                if (category) {
+                    url += `&category=${encodeURIComponent(category)}`;
+                }
+                
+                const response = await fetch(url);
+                const feeds = await response.json();
+                
+                // 피드 컨테이너 비우기
+                latestFeeds.innerHTML = '';
+                
+                if (feeds.length === 0) {
+                    // 피드가 없는 경우
+                    noFeeds.classList.remove('d-none');
+                    feedsLoading.classList.add('d-none');
+                    return;
+                }
+                
+                // 피드 항목 추가
+                feeds.forEach(feed => {
+                    const feedDate = new Date(feed.published);
+                    const formattedDate = feedDate.toLocaleString('ko-KR');
+                    
+                    const feedItem = document.createElement('div');
+                    feedItem.className = 'feed-item';
+                    feedItem.innerHTML = `
+                        <div class="feed-title">
+                            <a href="${feed.link}" target="_blank">${feed.title}</a>
+                        </div>
+                        <div class="feed-source">
+                            출처: ${feed.source_name} | 카테고리: ${feed.source_category}
+                        </div>
+                        <div class="feed-date">${formattedDate}</div>
+                        ${feed.description ? `<p class="mt-2">${truncateText(feed.description, 150)}</p>` : ''}
+                    `;
+                    
+                    latestFeeds.appendChild(feedItem);
+                });
+                
+                // 피드 표시
+                feedsLoading.classList.add('d-none');
+                latestFeeds.classList.remove('d-none');
+            } catch (error) {
+                console.error('피드 로드 오류:', error);
+                feedsLoading.classList.add('d-none');
+                noFeeds.classList.remove('d-none');
+            }
+        }
+        
+        // 카테고리 보기
+        async function showCategories() {
+            try {
+                const response = await fetch(`${API_URL}/categories`);
+                const categories = await response.json();
+                
+                alert(`사용 가능한 카테고리: ${categories.join(', ')}`);
+            } catch (error) {
+                console.error('카테고리 보기 오류:', error);
+                alert('카테고리를 불러오지 못했습니다.');
+            }
+        }
+        
+        // 텍스트 자르기 유틸리티 함수
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            
+            if (text.length <= maxLength) return text;
+            
+            return text.substring(0, maxLength) + '...';
+        }
+    </script>
+</body>
+</html> 

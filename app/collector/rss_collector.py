@@ -80,7 +80,7 @@ class RSSCollector:
             수집된 피드 아이템 목록
         """
         try:
-            feed = feedparser.parse(source['url'], timeout=self.timeout)
+            feed = feedparser.parse(source['url'])
             
             if feed.bozo == 1 and not feed.entries:
                 logger.warning(f"피드 파싱 오류: {source['url']} - {feed.bozo_exception}")

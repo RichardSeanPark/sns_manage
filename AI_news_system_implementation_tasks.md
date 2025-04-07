@@ -62,11 +62,30 @@
 - [x] 수집 결과 임시 저장 기능 구현 (JSON 형식)
 
 ### 2.2 RSS-MCP 서버 구현
-- [ ] MCP 서버 기본 구조 설정
-- [ ] RSS 관련 도구 함수 정의 (`search_feeds()`, `subscribe_feed()`, `get_recent_articles()`)
-- [ ] 도구 인터페이스 및 스키마 정의
-- [ ] 오류 처리 및 로깅 구현
-- [ ] 간단한 캐싱 메커니즘 구현
+- [x] MCP 서버 기본 구조 설계
+  - [x] MCP FastMCP 클래스 기반 앱 구현
+  - [x] 서버 설정 및 초기화 코드 구현
+  - [x] 에러 처리 및 로깅 기능 구현
+- [x] RSS 피드 관련 MCP 도구 구현
+  - [x] 피드 수집 도구 (collect_rss_feeds)
+  - [x] 최신 피드 조회 도구 (get_latest_feeds)
+  - [x] 피드 검색 도구 (search_feeds)
+- [x] RSS 피드 관련 MCP 리소스 구현
+  - [x] 카테고리 목록 리소스 (categories)
+  - [x] 소스 목록 리소스 (sources)
+  - [x] 서버 상태 리소스 (status)
+  - [x] 요약 목록 리소스 (summaries)
+- [x] MCP 음성 기능 구현
+  - [x] 요약 읽기 도구 (speak_summary)
+  - [x] 최신 뉴스 읽기 도구 (read_latest_news)
+- [x] MCP-FastAPI 통합
+  - [x] 별도 스레드에서 MCP 서버 실행 구현
+  - [x] API 공유 및 상호 작용 구현
+  - [x] 웹 UI에 MCP 상태 표시 기능 구현
+- [x] RSS-MCP 서버 테스트
+  - [x] 단위 테스트 작성 및 실행
+  - [x] 통합 테스트 작성 및 실행
+  - [x] 수동 테스트 지침서 작성
 
 ### 2.3 웹 크롤링 모듈 (기본)
 - [ ] 주요 크롤링 대상 웹사이트 정의 및 우선순위 설정
