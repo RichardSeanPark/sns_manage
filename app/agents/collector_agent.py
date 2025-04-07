@@ -4,6 +4,10 @@ from pydantic import BaseModel, Field
 from typing import List
 import os # API 키 환경 변수 사용 예시를 위해 추가
 
+# 도구 임포트
+from .tools.data_management_tools import get_collected_data_tool, save_collected_data_tool
+from .tools.collection_tools import collect_rss_feeds_tool # 새로 추가된 도구 임포트
+
 # 모델 제공자 설정 (LiteLLM 사용)
 # 실제 사용 시 API 키 등 환경 변수 설정 필요
 # litellm_provider = LiteLLMProvider(api_key=os.environ.get("YOUR_GEMMA_API_KEY_ENV_VAR"))
@@ -11,9 +15,13 @@ import os # API 키 환경 변수 사용 예시를 위해 추가
 # TODO: Gemma API 키 환경 변수 설정 및 Provider 초기화 코드 활성화 필요
 litellm_provider = LiteLLMProvider()
 
-# 에이전트가 사용할 도구 목록 (추후 실제 함수/클래스로 대체)
-# tools = [collect_rss_tool, crawl_webpage_tool, ...]
-tools = [] # 우선 빈 리스트
+# 에이전트가 사용할 도구 목록
+tools = [
+    get_collected_data_tool,
+    save_collected_data_tool,
+    collect_rss_feeds_tool, # 새로 추가된 도구
+    # TODO: 다른 도구들 추가 (크롤링, 스케줄링 등)
+] # 도구 목록 업데이트
 
 # 에이전트의 최종 출력 스키마 (예시)
 class CollectorAgentOutput(BaseModel):
@@ -50,7 +58,7 @@ collector_agent = Agent(
 """,
     model="gemma-3-27b-it", # 사용할 모델 지정
     model_provider=litellm_provider, # LiteLLM Provider 사용
-    tools=tools, # 사용할 도구 목록 (현재는 비어 있음)
+    tools=tools, # 수정된 tools 리스트 사용
     output_schema=AgentOutputSchema(CollectorAgentOutput) # 출력 형식 정의
 )
 
