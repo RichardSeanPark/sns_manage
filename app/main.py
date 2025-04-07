@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.api.routes import router as api_router
+from app.api.v1.collection import router as collection_router
 from app.config import (
     DEBUG, STATIC_DIR, TEMPLATES_DIR, PROJECT_ROOT, 
     SERVER_HOST, SERVER_PORT, API_PREFIX, 
@@ -59,6 +60,7 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 # API 라우터 등록
 app.include_router(api_router, prefix=API_PREFIX)
+app.include_router(collection_router)
 
 # MCP 서버 임포트 및 시작
 if MCP_ENABLED:
