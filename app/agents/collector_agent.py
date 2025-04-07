@@ -9,6 +9,7 @@ from .tools.data_management_tools import get_collected_data_tool, save_collected
 from .tools.collection_tools import collect_rss_feeds_tool, crawl_webpage_tool
 from .tools.scheduler_tools import schedule_collection_task_tool, check_task_status_tool, list_scheduled_tasks_tool
 from .tools.monitoring_tools import log_monitoring_start_tool, log_monitoring_end_tool # 모니터링 도구 임포트
+from .tools.evaluation_tools import evaluate_source_quality_tool # 평가 도구 임포트
 
 # 모델 제공자 설정 (LiteLLM 사용)
 # 실제 사용 시 API 키 등 환경 변수 설정 필요
@@ -28,6 +29,7 @@ tools = [
     list_scheduled_tasks_tool,
     log_monitoring_start_tool, # 모니터링 도구 추가
     log_monitoring_end_tool,   # 모니터링 도구 추가
+    evaluate_source_quality_tool, # 평가 도구 추가
     # TODO: evaluate_source_quality 도구 추가
 ]
 
@@ -51,7 +53,7 @@ collector_agent = Agent(
 - `list_scheduled_tasks_tool`: 스케줄된 모든 작업 목록을 조회합니다.
 - `get_collected_data_tool`: 저장된 수집 데이터를 조회합니다 (필터링/페이징 가능).
 - `save_collected_data_tool`: 수집된 데이터를 저장소에 저장합니다 (중복 확인 포함).
-- `evaluate_source_quality`: 주어진 기준에 따라 데이터 소스의 품질을 평가합니다. (미구현)
+- `evaluate_source_quality_tool`: 주어진 데이터 소스 URL의 품질을 평가하여 점수와 근거를 반환합니다. (현재 임시 구현)
 - `log_monitoring_start_tool`: 특정 작업의 모니터링 로그 기록을 시작합니다.
 - `log_monitoring_end_tool`: 특정 작업의 모니터링 로그 기록을 종료하고 결과를 기록합니다.
 
@@ -60,7 +62,7 @@ collector_agent = Agent(
 2.  데이터 수집 작업 시작 시 `log_monitoring_start_tool`을 호출하여 로그 ID를 얻습니다.
 3.  수집된 각 데이터 항목은 `save_collected_data_tool` 도구를 사용하여 저장합니다.
 4.  데이터 수집 작업 종료 시 `log_monitoring_end_tool`을 호출하여 로그 ID, 최종 상태, 통계 등을 기록합니다.
-5.  정기적으로 `evaluate_source_quality` 도구를 사용하여 등록된 소스들의 품질과 관련성을 평가하고, 결과에 따라 수집 우선순위를 조정할 것을 제안합니다.
+5.  정기적으로 `evaluate_source_quality_tool` 도구를 사용하여 등록된 소스들의 품질과 관련성을 평가하고, 결과에 따라 수집 우선순위를 조정할 것을 제안합니다.
 6.  수집된 콘텐츠 내에서 새로운 잠재적 정보 소스를 발견하면 보고합니다.
 7.  외부 요청(`get_collected_data_tool` 사용) 또는 작업 상태 확인(`check_task_status_tool`, `list_scheduled_tasks_tool` 사용) 요청에 응답합니다.
 
