@@ -19,4 +19,12 @@ class ProcessingStatus(str, Enum):
     PUBLISHING = "publishing"  # 게시 중
     PUBLISHED = "published"      # 게시 완료
     ERROR = "error"            # 처리 중 오류 발생
-    SKIPPED = "skipped"        # 처리 건너뜀 (e.g., 중복) 
+    SKIPPED = "skipped"        # 처리 건너뜀 (e.g., 중복)
+
+class MonitoringStatus(str, Enum):
+    """모니터링 작업 상태"""
+    STARTED = "started"
+    SUCCESS = "success"
+    FAILED = "failed"
+    PARTIAL_SUCCESS = "partial_success" # 일부 성공, 일부 실패
+    SKIPPED = "skipped" # 실행 조건 미충족 등으로 건너뜀 

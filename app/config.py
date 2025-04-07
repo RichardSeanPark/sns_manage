@@ -54,6 +54,7 @@ MCP_PORT = int(os.getenv("MCP_PORT", "8100"))
 BROWSER_POOL_SIZE = int(os.getenv("BROWSER_POOL_SIZE", "3"))
 PAGE_LOAD_TIMEOUT_MS = int(os.getenv("PAGE_LOAD_TIMEOUT_MS", "60000")) # 60 seconds
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "2"))
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" # 웹 크롤링 시 사용할 User-Agent
 
 # RSS 피드 설정
 RSS_SOURCES = [
