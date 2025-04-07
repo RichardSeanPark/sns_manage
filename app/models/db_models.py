@@ -1,8 +1,9 @@
-from sqlalchemy import create_engine, Column, String, DateTime, Text, Float, JSON, Index
+from sqlalchemy import create_engine, Column, String, DateTime, Text, Float, JSON, Index, Integer
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.sql import func
 from datetime import datetime
 import os
+from .enums import MonitoringStatus
 
 # 데이터베이스 경로 (config에서 가져오도록 변경 예정)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +41,28 @@ class CollectedDataDB(Base):
         Index('ix_collected_data_source_url', 'source_url'),
         Index('ix_collected_data_published_at', 'published_at'),
         Index('ix_collected_data_status', 'processing_status'),
+    )
+
+# --- 모니터링 로그 모델 ---
+class MonitoringLogDB(Base):
+    __tablename__ = "monitoring_log"
+
+    id: int = Column(Integer, primary_key=True, autoincrement=True)
+    task_name: str = Column(String, nullable=False)
+    start_time: datetime = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    end_time: datetime = Column(DateTime(timezone=True), nullable=True) # 작업 종료 시 업데이트
+    status: str = Column(String, nullable=False) # MonitoringStatus 값 저장
+    items_processed: int = Column(Integer, nullable=True)
+    items_succeeded: int = Column(Integer, nullable=True)
+    items_failed: int = Column(Integer, nullable=True)
+    error_message: str = Column(Text, nullable=True) # 실패 시 상세 오류 메시지
+    details: dict = Column(JSON, nullable=True) # 추가 정보 (e.g., 실패한 URL 리스트)
+
+    # 검색 편의를 위한 인덱스 추가
+    __table_args__ = (
+        Index('ix_monitoring_log_task_name', 'task_name'),
+        Index('ix_monitoring_log_status', 'status'),
+        Index('ix_monitoring_log_start_time', 'start_time'),
     )
 
 # 데이터베이스 및 테이블 생성 함수 (필요시 사용)
